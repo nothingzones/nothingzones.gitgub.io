@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nothing Space - Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <meta name="google-adsense-account" content="ca-pub-5140781527793808">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5140781527793808" crossorigin="anonymous"></script>
+
+    <style>
+        /* CORE STYLES COPY (Short version for Index) */
+        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; --border: #1a1a1a; --transition: 0.3s; color-scheme: light dark; }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; width: 100%; min-height: 100vh; overflow-x: hidden; }
+        
+        /* HEADER & BENTO */
+        header { max-width: 1000px; margin: 40px auto 20px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 3.5rem; letter-spacing: -1px; line-height: 0.9; margin: 0; }
+        
+        .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
+        @media (min-width: 768px) { .bento { grid-template-columns: repeat(3, 1fr); } }
+        
+        /* LINKS instead of DIVs */
+        .tile { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 25px; 
+            text-decoration: none; color: var(--text); display: block; transition: var(--transition);
+        }
+        .tile:hover { border-color: #555; transform: translateY(-3px); }
+        .tile h2 { font-size: 2.2rem; margin-bottom: 5px; text-transform: uppercase; font-weight: normal; }
+        .tile p { opacity: 0.5; font-size: 1rem; text-transform: uppercase; }
+        .full { grid-column: span 2; }
+        @media (min-width: 768px) { .full { grid-column: span 1; } }
+
+        /* ANIMATIONS */
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: blink 3s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } }
+        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
+        
+        /* FOOTER */
+        footer { text-align: center; padding: 30px; opacity: 0.4; font-size: 0.9rem; }
+        
+        /* ENTRANCE LOADER */
+        .entrance-wrapper { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: transform 1s ease; }
+        .entrance-wrapper.exit { transform: translateY(-100%); }
+        .nothing-logo { font-family: sans-serif; letter-spacing: 5px; font-size: 2rem; color: #fff; animation: pulse 1.5s infinite; }
+        .loader-bar { width: 200px; height: 2px; background: #333; margin-top: 15px; position: relative; overflow: hidden; }
+        .loader-bar::after { content: ''; position: absolute; width: 50px; height: 100%; background: #fff; animation: loading 2s infinite; }
+        @keyframes loading { from { left: -50px; } to { left: 100%; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+
+<div id="wrapper" class="entrance-wrapper">
+    <div class="wrapper-content">
+        <h1 class="nothing-logo">NOTHING SPACE</h1>
+        <div class="loader-bar"></div>
+    </div>
+</div>
+
+<div class="stars-container" id="starField"></div>
+<div class="canvas"></div>
+
+<header>
+    <div class="logo">
+        <p style="opacity: 0.4; letter-spacing: 2px; font-family: 'VT323';">ONLY FOR FANS</p>
+        <h1>NOTHING<br>SPACE</h1>
+    </div>
+</header>
+
+<div class="bento">
+    <a href="software.html" class="tile full"><h2>SOFTWARE</h2><p>NOS ZIP FILE UPDATE</p></a>
+    <a href="ringtones.html" class="tile full"><h2>RINGTONE</h2><p>DOWNLOAD MP3</p></a>
+    <a href="wallpapers.html" class="tile full"><h2>WALLPAPER</h2><p>EXCLUSIVE & AI GEN</p></a>
+    <a href="playground.html" class="tile full"><h2>PLAYGROUND</h2><p>PRESETS & WIDGETS</p></a>
+    <a href="service.html" class="tile full"><h2>SERVICE</h2><p>LOCATE CENTERS</p></a>
+    <a href="https://t.me/techiboy_discuss" target="_blank" class="tile full"><h2>COMMUNITY</h2><p>JOIN TELEGRAM</p></a>
+</div>
+
+<footer>
+    <p>NOTHING SPACE © 2026<br>DESIGNED FOR THE COMMUNITY</p>
+</footer>
+
+<script>
+    window.addEventListener('load', () => {
+        createStars();
+        const wrapper = document.getElementById('wrapper');
+        setTimeout(() => { if(wrapper) { wrapper.classList.add('exit'); } }, 1500);
+    });
+
+    function createStars() {
+        const field = document.getElementById('starField');
+        for(let i=0; i<150; i++) {
+            const s = document.createElement('div'); s.className = 'star';
+            const size = Math.random() * 3;
+            Object.assign(s.style, { width:size+'px', height:size+'px', top:Math.random()*100+'%', left:Math.random()*100+'%', animationDelay: Math.random()+'s' });
+            field.appendChild(s);
+        }
+    }
+</script>
+</body>
+</html>
