@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - Nothing Space</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; --border: #1a1a1a; --instr: #bbb; --accent: #ff0000; color-scheme: light dark; }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; --instr: #333; }
+        [data-theme="dark"] { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #250; --border: #1a1a1a; --instr: #bbb; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        
+        .stars-container { position: fixed; inset: 0; z-index: -1; background: var(--bg); pointer-events: none; }
+        .star { position: absolute; background: var(--text); border-radius: 50%; opacity: 0; animation: blink 3s infinite; }
+        @keyframes blink { 0%,100% { opacity:0; } 50% { opacity:1; } }
+        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
+        .moon { position: fixed; width: 80px; height: 80px; top: 10%; left: 10%; background: #d1d1d1; border-radius: 50%; z-index: -1; opacity: 0.5; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2); }
+
+        .page-wrapper { background: var(--bg); border: 1px solid var(--border); width: 90%; max-width: 500px; height: 85vh; border-radius: 35px; padding: 30px; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); display:flex; flex-direction:column; }
+        @keyframes bounceIn { 0% { transform: scale(0.7) translateY(50px); opacity:0; } 100% { transform: scale(1) translateY(0); opacity:1; } }
+        .close-icon { position: absolute; right: 25px; top: 25px; font-size: 2.2rem; cursor: pointer; opacity: 0.5; color: var(--text); text-decoration: none; z-index:10; }
+        h2 { margin-bottom: 5px; font-size: 2rem; line-height: 1; text-transform: uppercase; }
+
+        #msgBoard { flex: 1; overflow-y: auto; padding: 10px; margin: 15px 0; border: 1px solid var(--border); border-radius: 20px; background: rgba(0,0,0,0.05); }
+        .msg-bubble { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px 15px; border-radius: 20px; margin-bottom: 10px; }
+        .u-badge { font-size: 0.7rem; background: var(--text); color: var(--bg); padding: 2px 8px; border-radius: 5px; margin-bottom: 5px; display: inline-block; }
+        .admin-reply-box { margin-top: 10px; padding: 8px 12px; background: rgba(255, 0, 0, 0.05); border-left: 2px solid var(--accent); border-radius: 10px; font-size: 0.9rem; }
+        
+        .chat-input { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 5px 5px 5px 15px; display: flex; align-items: center; }
+        input { flex: 1; background: transparent; border: none; color: var(--text); outline: none; font-family: 'VT323'; font-size: 1.2rem; text-transform: uppercase; }
+        .send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--text); color: var(--bg); border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starField"></div>
+    <div class="canvas"></div>
+    <div class="moon"></div>
+
+    <div class="page-wrapper">
+        <a href="index.html" class="close-icon">×</a>
+        <h2>COMMUNITY</h2>
+        <p style="opacity:0.4; font-size:0.8rem;">PUBLIC FEEDBACK & CHAT</p>
+        
+        <div id="msgBoard"><p style="text-align:center; margin-top:50px; opacity:0.5;">LOADING...</p></div>
+        
+        <div class="chat-input">
+            <input type="text" id="userMsg" placeholder="SHARE SUGGESTION...">
+            <button class="send-btn" onclick="sendMsg()"><i class="fa-solid fa-arrow-up"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = "https://nothingcommunity-7664f-default-rtdb.firebaseio.com/chat.json";
+        let userUUID = localStorage.getItem('ns_user_uuid') || ('uid_' + Date.now());
+        localStorage.setItem('ns_user_uuid', userUUID);
+        let savedName = localStorage.getItem('ns_user_fixed') || "";
+
+        window.onload = function() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            const f = document.getElementById('starField');
+            for(let i=0; i<100; i++) { const s = document.createElement('div'); s.className = 'star'; const z = Math.random()*3; s.style.cssText = `width:${z}px; height:${z}px; top:${Math.random()*100}%; left:${Math.random()*100}%; animation: blink ${2+Math.random()*3}s infinite; opacity:${Math.random()}`; f.appendChild(s); }
+            loadMessages();
+        };
+
+        async function loadMessages() {
+            try {
+                const r = await fetch(DB_URL); const d = await r.json(); const b = document.getElementById('msgBoard');
+                if(!d) { b.innerHTML='<p style="text-align:center; opacity:0.5;">NO MESSAGES</p>'; return; }
+                const m = Object.keys(d).map(k => ({id:k, ...d[k]}));
+                b.innerHTML = m.map(x => `
+                    <div class="msg-bubble" onmousedown="startPress('${x.id}','${x.userName}',false,'${x.uuid}')" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress('${x.id}','${x.userName}',false,'${x.uuid}')" ontouchend="cancelPress()">
+                        <span class="u-badge">${x.userName||'USER'}</span>
+                        <p style="text-transform:none; margin:5px 0;">${x.text}</p>
+                        ${x.reply?`<div class="admin-reply-box"><b style="color:var(--accent)">ADMIN:</b> ${x.reply}</div>`:''}
+                    </div>`).join('');
+                b.scrollTop = b.scrollHeight;
+            } catch(e) {}
+        }
+
+        async function sendMsg() {
+            const t = document.getElementById('userMsg').value.trim();
+            if(!t) return;
+            if(!savedName) { const n = prompt("ENTER NAME:"); if(!n)return; savedName=n.toUpperCase(); localStorage.setItem('ns_user_fixed',savedName); }
+            await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userName:savedName, text:t, uuid:userUUID, timestamp:Date.now() }) });
+            document.getElementById('userMsg').value=''; loadMessages();
+        }
+
+        let pt;
+        function startPress(id,n,v,u) { pt=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(50);adminAction(id,u);},2000); }
+        function cancelPress() { clearTimeout(pt); }
+        async function adminAction(id,u) {
+            const p = prompt("PASS:"); let h=0; for(let i=0;i<p.length;i++) h=((h<<5)-h)+p.charCodeAt(i); h|=0;
+            if(h==1540218370) {
+                const a = prompt("1.REPLY 2.DELETE 3.BAN");
+                if(a=="1") { const r=prompt("REPLY:"); await fetch(`https://nothingcommunity-7664f-default-rtdb.firebaseio.com/chat/${id}.json`,{method:'PATCH',body:JSON.stringify({reply:r})}); }
+                if(a=="2") await fetch(`https://nothingcommunity-7664f-default-rtdb.firebaseio.com/chat/${id}.json`,{method:'DELETE'});
+                if(a=="3") await fetch(`https://nothingcommunity-7664f-default-rtdb.firebaseio.com/banned/${u}.json`,{method:'PUT',body:'true'});
+                loadMessages();
+            }
+        }
+    </script>
+</body>
+</html>
