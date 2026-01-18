@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Nothing Space</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* PASTE SAME CSS FROM PLAYGROUND.HTML */
+        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; --border: #1a1a1a; --instr: #bbb; --accent: #ff0000; color-scheme: light dark; }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; --instr: #333; }
+        [data-theme="dark"] { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #250; --border: #1a1a1a; --instr: #bbb; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        
+        img { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; pointer-events: auto !important; }
+        
+        .stars-container { position: fixed; inset: 0; z-index: -1; background: var(--bg); pointer-events: none; }
+        .star { position: absolute; background: var(--text); border-radius: 50%; opacity: 0; animation: blink 3s infinite; }
+        @keyframes blink { 0%,100% { opacity:0; } 50% { opacity:1; } }
+        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
+        .moon { position: fixed; width: 80px; height: 80px; top: 10%; left: 10%; background: #d1d1d1; border-radius: 50%; z-index: -1; opacity: 0.5; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2); }
+
+        .page-wrapper { background: var(--bg); border: 1px solid var(--border); width: 90%; max-width: 500px; height: 85vh; border-radius: 35px; padding: 30px; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y:auto; }
+        @keyframes bounceIn { 0% { transform: scale(0.7) translateY(50px); opacity:0; } 100% { transform: scale(1) translateY(0); opacity:1; } }
+        .close-icon { position: absolute; right: 25px; top: 25px; font-size: 2.2rem; cursor: pointer; opacity: 0.5; color: var(--text); text-decoration: none; z-index:10; }
+        h2 { margin-bottom: 20px; font-size: 2rem; line-height: 1; text-transform: uppercase; }
+
+        .wp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .wp-card { background: var(--card); border-radius: 25px; position: relative; overflow: hidden; border: 1px solid var(--border); height: 250px; }
+        .wp-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .wp-overlay { position: absolute; bottom: 0; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); text-align: center; }
+        
+        .ai-link { background: var(--text); color: var(--bg); border-radius: 20px; padding: 16px; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.2rem; }
+        #aiSection { display: none; margin-bottom: 20px; background: var(--card); padding: 15px; border-radius: 20px; border: 1px solid var(--border); }
+        input, select { width: 100%; padding: 15px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 15px; margin-bottom: 10px; font-family: 'VT323'; font-size: 1.2rem; outline: none; }
+        .btn { width: 100%; padding: 10px; border-radius: 15px; border: none; background: #fff; color: #000; font-size: 1rem; cursor: pointer; font-weight: bold; font-family: 'VT323'; }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starField"></div>
+    <div class="canvas"></div>
+    <div class="moon"></div>
+
+    <div class="page-wrapper">
+        <a href="index.html" class="close-icon">×</a>
+        <h2>GALLERY</h2>
+        
+        <div class="ai-link" onclick="toggleAI()">
+            <span>CREATE WITH AI</span><i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        
+        <div id="aiSection">
+            <input type="text" id="aiPrompt" placeholder="DESCRIBE IDEA...">
+            <select id="aiRatio"><option value="9:16">MOBILE (9:16)</option><option value="1:1">SQUARE (1:1)</option></select>
+            <button class="btn" onclick="genAI()" style="background:var(--text); color:var(--bg); font-size:1.4rem;">GENERATE</button>
+            <div id="aiRes" style="display:none; margin-top:10px;">
+                <img id="aiImg" src="" style="width:100%; border-radius:15px; margin-bottom:10px;">
+                <button class="btn" onclick="dlAI()">DOWNLOAD</button>
+            </div>
+        </div>
+
+        <div class="wp-grid" id="wallpaperGrid"><p style="grid-column: span 2; text-align: center;">LOADING...</p></div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            createStars();
+            loadWalls();
+        };
+        window.addEventListener("contextmenu", e => { if(e.target.tagName==='IMG') e.preventDefault(); }, false);
+
+        function createStars() {
+            const f = document.getElementById('starField');
+            for(let i=0; i<100; i++) { const s = document.createElement('div'); s.className = 'star'; const z = Math.random()*3; s.style.cssText = `width:${z}px; height:${z}px; top:${Math.random()*100}%; left:${Math.random()*100}%; animation: blink ${2+Math.random()*3}s infinite; opacity:${Math.random()}`; f.appendChild(s); }
+        }
+
+        async function loadWalls() {
+            try {
+                const r = await fetch("https://raw.githubusercontent.com/nothingcommunity/Testing/main/Wallpapers/Walls/wallpapers.json");
+                const d = await r.json(); const w = Array.isArray(d) ? d : d.wallpapers;
+                document.getElementById('wallpaperGrid').innerHTML = w.map(i => 
+                    `<div class="wp-card"><img src="${i.img}" loading="lazy"><div class="wp-overlay"><button class="btn" onclick="runDownload('${i.url}')">DOWNLOAD</button></div></div>`
+                ).join('');
+            } catch(e) {}
+        }
+
+        function toggleAI() { const x=document.getElementById('aiSection'); x.style.display=x.style.display==='none'?'block':'none'; }
+        
+        async function genAI() {
+            const p = document.getElementById('aiPrompt').value;
+            if(!p) return alert("ENTER TEXT");
+            const r = document.getElementById('aiRatio').value; let w=1080,h=1920; if(r==="1:1"){w=1080;h=1080;}
+            const btn = document.querySelector('#aiSection .btn'); btn.innerText="WAIT...";
+            try {
+                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p+", nothing style, minimal")}?width=${w}&height=${h}&nologo=true&model=flux`;
+                const res = await fetch(url); const b = await res.blob();
+                document.getElementById('aiImg').src = URL.createObjectURL(b);
+                document.getElementById('aiRes').style.display = 'block';
+            } catch(e) { alert("ERROR"); }
+            btn.innerText = "GENERATE";
+        }
+
+        async function runDownload(url) {
+            try {
+                const r = await fetch(url); const b = await r.blob(); const u = URL.createObjectURL(b);
+                const a = document.createElement('a'); a.href = u; a.download = "Wall_" + Date.now() + ".jpg"; 
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(u);
+            } catch (e) { window.open(url, '_blank'); }
+        }
+        function dlAI() { runDownload(document.getElementById('aiImg').src); }
+    </script>
+</body>
+</html>
