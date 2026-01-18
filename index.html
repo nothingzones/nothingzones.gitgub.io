@@ -1,109 +1,199 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nothing Space - Home</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nothing Space - Built Together</title>
+    <meta name="description" content="Community hub for Nothing Phone users. Download firmware, wallpapers, and tools.">
+    
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5839265106233069" crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="ca-pub-5839265106233069">
+    
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <meta name="google-adsense-account" content="ca-pub-5140781527793808">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5140781527793808" crossorigin="anonymous"></script>
 
     <style>
-        /* CORE STYLES COPY (Short version for Index) */
-        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; --border: #1a1a1a; --transition: 0.3s; color-scheme: light dark; }
-        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; }
+        /* ================= ROOT & THEME ================= */
+        :root { 
+            --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; 
+            --border: #1a1a1a; --instr: #bbb; --accent: #ff0000;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color-scheme: light dark;
+        }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; --instr: #333; }
+        [data-theme="dark"] { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #250; --border: #1a1a1a; --instr: #bbb; }
+
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'VT323', monospace; 
+            transition: background var(--transition); width: 100%; overflow-x: hidden; min-height: 100vh; 
+        }
+
+        h1, h2, h3, span, button, p, a { font-family: 'VT323', monospace !important; text-transform: uppercase; }
         
-        /* HEADER & BENTO */
-        header { max-width: 1000px; margin: 40px auto 20px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo h1 { font-size: 3.5rem; letter-spacing: -1px; line-height: 0.9; margin: 0; }
-        
-        .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
+        /* IMAGE PROTECTION */
+        img { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-user-drag: none !important; pointer-events: auto !important; }
+
+        /* ================= BACKGROUNDS ================= */
+        .stars-container { position: fixed; inset: 0; z-index: -1; background: var(--bg); overflow: hidden; pointer-events: none; }
+        .star { position: absolute; background: var(--text); border-radius: 50%; opacity: 0; will-change: opacity; }
+
+        .canvas { 
+            position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); 
+            background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none;
+        }
+
+        .moon {
+            position: fixed; width: 80px; height: 80px; 
+            top: 10%; left: 10%; 
+            background: #d1d1d1; border-radius: 50%; z-index: -1; opacity: 0.5;
+            box-shadow: inset -15px -15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2);
+            background-image: radial-gradient(circle at 30% 30%, #adadad 10%, transparent 15%), radial-gradient(circle at 60% 70%, #adadad 8%, transparent 12%);
+        }
+
+        /* ================= HEADER ================= */
+        header { max-width: 1000px; margin: 30px auto 20px; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
+        .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 3.5rem; letter-spacing: -1px; line-height: 0.9; }
+        .logo p { opacity: 0.8 !important; letter-spacing: 2px; }
+
+        .t-toggle { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; cursor: pointer; background: var(--card); transition: var(--transition); }
+        .t-toggle:hover { border-color: var(--text); }
+        #t-icon { color: var(--text) !important; transition: transform .3s ease; } 
+        .t-toggle:active #t-icon { transform: rotate(150deg) scale(1.1); }
+
+        /* ================= BENTO GRID ================= */
+        .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 1000px; margin: 0 auto; padding: 0 20px 20px; }
         @media (min-width: 768px) { .bento { grid-template-columns: repeat(3, 1fr); } }
-        
-        /* LINKS instead of DIVs */
+
+        /* TILE AS LINK */
         .tile { 
             background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 25px; 
-            text-decoration: none; color: var(--text); display: block; transition: var(--transition);
+            cursor: pointer; transition: var(--transition); display: block; text-decoration: none; color: var(--text);
+            position: relative; overflow: hidden;
         }
-        .tile:hover { border-color: #555; transform: translateY(-3px); }
-        .tile h2 { font-size: 2.2rem; margin-bottom: 5px; text-transform: uppercase; font-weight: normal; }
-        .tile p { opacity: 0.5; font-size: 1rem; text-transform: uppercase; }
+        .tile:hover { border-color: var(--text); transform: translateY(-2px); }
+        .tile:active { transform: scale(0.95); }
+        .tile h1 { font-size: 2.2rem; position: relative; z-index: 2; margin: 0; line-height: 1; }
+        .tile p { opacity: 0.8 !important; font-size: 1rem; position: relative; z-index: 2; margin-top: 5px; text-transform: uppercase; }
+
         .full { grid-column: span 2; }
         @media (min-width: 768px) { .full { grid-column: span 1; } }
 
-        /* ANIMATIONS */
-        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: blink 3s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } }
-        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
-        
-        /* FOOTER */
-        footer { text-align: center; padding: 30px; opacity: 0.4; font-size: 0.9rem; }
-        
-        /* ENTRANCE LOADER */
-        .entrance-wrapper { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: transform 1s ease; }
-        .entrance-wrapper.exit { transform: translateY(-100%); }
-        .nothing-logo { font-family: sans-serif; letter-spacing: 5px; font-size: 2rem; color: #fff; animation: pulse 1.5s infinite; }
-        .loader-bar { width: 200px; height: 2px; background: #333; margin-top: 15px; position: relative; overflow: hidden; }
-        .loader-bar::after { content: ''; position: absolute; width: 50px; height: 100%; background: #fff; animation: loading 2s infinite; }
-        @keyframes loading { from { left: -50px; } to { left: 100%; } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        /* ================= FOOTER ================= */
+        footer { text-align: center; padding: 30px; opacity: 1 !important; font-size: 0.8rem; letter-spacing: 1px; margin-top: 10px; }
+        .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; flex-wrap: wrap; }
+        footer a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; }
+        footer a:hover { border-color: var(--text); }
+        footer p { opacity: 0.8 !important; }
     </style>
 </head>
 <body>
+    <div class="stars-container" id="starField"></div>
+    <div class="canvas"></div>
+    <div class="moon"></div>
 
-<div id="wrapper" class="entrance-wrapper">
-    <div class="wrapper-content">
-        <h1 class="nothing-logo">NOTHING SPACE</h1>
-        <div class="loader-bar"></div>
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <p style="opacity: 0.4; letter-spacing: 2px;">ONLY FOR FANS</p>
+                <h1>NOTHING<br>SPACE</h1>
+            </div>
+            <button class="t-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+                <i class="fa-solid fa-circle" id="t-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="bento">
+        <a href="updates.html" class="tile full">
+            <h1>WEBSITE</h1><p>WHAT'S NEW ADDED</p>
+        </a>
+
+        <a href="ringtone.html" class="tile full">
+            <h1>RINGTONE</h1><p>Preview Your Song</p>
+        </a>
+
+        <a href="playground.html" class="tile full">
+            <h1>PLAYGROUND</h1><p>presets WIDGETs APPs</p>
+        </a>
+
+        <a href="software.html" class="tile full">
+            <h1>SOFTWARE </h1><p>NOS ZIP FILE</p>
+        </a>
+
+        <a href="wallpapers.html" class="tile full">
+            <h1>WALLPAPER </h1><p>EXCLUSIVe Collection</p>
+        </a>
+
+        <a href="service.html" class="tile full">
+            <h1>SERVICE </h1><p>LOCATE CENTERS</p>
+        </a>
+
+        <a href="community.html" class="tile full">
+            <h1>COMMUNITY </h1><p>FEEDBACK & SUGGESTIONS</p>
+        </a>
     </div>
-</div>
 
-<div class="stars-container" id="starField"></div>
-<div class="canvas"></div>
-
-<header>
-    <div class="logo">
-        <p style="opacity: 0.4; letter-spacing: 2px; font-family: 'VT323';">ONLY FOR FANS</p>
-        <h1>NOTHING<br>SPACE</h1>
+    <div style="max-width: 1000px; margin: 20px auto; padding: 0 20px; opacity: 0.6; font-size: 0.9rem;">
+        <p>Welcome to Nothing Space, the ultimate community hub for Nothing Phone (1), (2), and (2a) users. Find official OTA updates, exclusive wallpapers, ringtones, and service center locations.</p>
     </div>
-</header>
 
-<div class="bento">
-    <a href="software.html" class="tile full"><h2>SOFTWARE</h2><p>NOS ZIP FILE UPDATE</p></a>
-    <a href="ringtones.html" class="tile full"><h2>RINGTONE</h2><p>DOWNLOAD MP3</p></a>
-    <a href="wallpapers.html" class="tile full"><h2>WALLPAPER</h2><p>EXCLUSIVE & AI GEN</p></a>
-    <a href="playground.html" class="tile full"><h2>PLAYGROUND</h2><p>PRESETS & WIDGETS</p></a>
-    <a href="service.html" class="tile full"><h2>SERVICE</h2><p>LOCATE CENTERS</p></a>
-    <a href="https://t.me/techiboy_discuss" target="_blank" class="tile full"><h2>COMMUNITY</h2><p>JOIN TELEGRAM</p></a>
-</div>
+    <footer>
+        <div class="footer-links">
+            <a href="about.html">ABOUT</a>
+            <a href="privacy.html">PRIVACY</a>
+            <a href="terms.html">TERMS</a>
+            <a href="disclaimer.html">DISCLAIMER</a>
+            <a href="contact.html">CONTACT</a>
+        </div>
+        <p>NOTHING SPACE © 2026<br>DESIGNED FOR THE COMMUNITY</p>
+    </footer>
 
-<footer>
-    <p>NOTHING SPACE © 2026<br>DESIGNED FOR THE COMMUNITY</p>
-</footer>
+    <script>
+        // INIT
+        window.onload = function() {
+            applyAutoTheme();
+            createStars();
+        };
 
-<script>
-    window.addEventListener('load', () => {
-        createStars();
-        const wrapper = document.getElementById('wrapper');
-        setTimeout(() => { if(wrapper) { wrapper.classList.add('exit'); } }, 1500);
-    });
+        // IMAGE PROTECTION
+        window.addEventListener("contextmenu", function(e) {
+            if (e.target.tagName === 'IMG') { e.preventDefault(); }
+        }, false);
 
-    function createStars() {
-        const field = document.getElementById('starField');
-        for(let i=0; i<150; i++) {
-            const s = document.createElement('div'); s.className = 'star';
-            const size = Math.random() * 3;
-            Object.assign(s.style, { width:size+'px', height:size+'px', top:Math.random()*100+'%', left:Math.random()*100+'%', animationDelay: Math.random()+'s' });
-            field.appendChild(s);
+        // THEME LOGIC
+        function applyAutoTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            updateThemeIcon(prefersDark ? 'dark' : 'light');
         }
-    }
-</script>
+        function toggleTheme() {
+            const root = document.documentElement;
+            const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+        function updateThemeIcon(theme) { 
+            document.getElementById('t-icon').className = theme === 'dark' ? "fa-solid fa-circle" : "fa-solid fa-sun"; 
+        }
+
+        // STARS ANIMATION
+        function createStars() {
+            requestAnimationFrame(() => {
+                const field = document.getElementById('starField');
+                field.innerHTML = '';
+                const count = window.innerWidth < 768 ? 80 : 250;
+                for(let i=0; i < count; i++) {
+                    const s = document.createElement('div'); s.className = 'star';
+                    const size = Math.random() * 3;
+                    s.style.cssText = `width:${size}px; height:${size}px; top:${Math.random()*100}%; left:${Math.random()*100}%; animation: blink ${2+Math.random()*3}s infinite; opacity:${Math.random()}`;
+                    field.appendChild(s);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
