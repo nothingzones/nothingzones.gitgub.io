@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playground - Nothing Space</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === EXACT THEME FROM INDEX === */
+        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; --border: #1a1a1a; --instr: #bbb; --accent: #ff0000; color-scheme: light dark; }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; --instr: #333; }
+        [data-theme="dark"] { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #250; --border: #1a1a1a; --instr: #bbb; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        
+        /* IMAGE LOCK */
+        img { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; pointer-events: auto !important; }
+
+        /* BACKGROUNDS */
+        .stars-container { position: fixed; inset: 0; z-index: -1; background: var(--bg); pointer-events: none; }
+        .star { position: absolute; background: var(--text); border-radius: 50%; opacity: 0; animation: blink 3s infinite; }
+        @keyframes blink { 0%,100% { opacity:0; } 50% { opacity:1; } }
+        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
+        .moon { position: fixed; width: 80px; height: 80px; top: 10%; left: 10%; background: #d1d1d1; border-radius: 50%; z-index: -1; opacity: 0.5; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2); }
+
+        /* CARD UI */
+        .page-wrapper { background: var(--bg); border: 1px solid var(--border); width: 90%; max-width: 500px; height: 85vh; border-radius: 35px; padding: 30px; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y:auto; }
+        @keyframes bounceIn { 0% { transform: scale(0.7) translateY(50px); opacity:0; } 100% { transform: scale(1) translateY(0); opacity:1; } }
+        .close-icon { position: absolute; right: 25px; top: 25px; font-size: 2.2rem; cursor: pointer; opacity: 0.5; color: var(--text); text-decoration: none; z-index: 10; }
+        h2 { margin-bottom: 20px; font-size: 2rem; line-height: 1; text-transform: uppercase; }
+
+        /* GRID */
+        .wp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .wp-card { background: var(--card); border-radius: 25px; position: relative; overflow: hidden; border: 1px solid var(--border); height: 250px; }
+        .wp-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .wp-overlay { position: absolute; bottom: 0; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); text-align: center; }
+        
+        .btn { position: relative; width: 90%; margin: 5px auto 0; padding: 8px 0; font-size: 1rem; border-radius: 15px; border: none; background: #fff; color: #000; cursor: pointer; font-weight: bold; overflow: hidden; display: flex; justify-content: center; font-family: 'VT323'; }
+        .progress-bar { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: rgba(0,0,0,0.2); z-index: 1; }
+        .btn-text { position: relative; z-index: 2; }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starField"></div>
+    <div class="canvas"></div>
+    <div class="moon"></div>
+
+    <div class="page-wrapper">
+        <a href="index.html" class="close-icon">×</a>
+        <h2>PLAYGROUND</h2>
+        <p style="opacity:0.5; font-size:0.9rem; margin-bottom:10px;">CAMERA PRESETS & WIDGETS</p>
+        
+        <div class="wp-grid" id="presetGrid">
+            <p style="grid-column: span 2; text-align: center;">LOADING...</p>
+        </div>
+    </div>
+
+    <script>
+        // INIT
+        window.onload = function() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            createStars();
+            loadPresets();
+        };
+        // DISABLE CONTEXT MENU
+        window.addEventListener("contextmenu", e => { if(e.target.tagName==='IMG') e.preventDefault(); }, false);
+
+        function createStars() {
+            const f = document.getElementById('starField');
+            for(let i=0; i<100; i++) { const s = document.createElement('div'); s.className = 'star'; const z = Math.random()*3; s.style.cssText = `width:${z}px; height:${z}px; top:${Math.random()*100}%; left:${Math.random()*100}%; animation: blink ${2+Math.random()*3}s infinite; opacity:${Math.random()}`; f.appendChild(s); }
+        }
+
+        async function loadPresets() {
+            try {
+                const r = await fetch("https://raw.githubusercontent.com/nothingcommunity/Testing/main/Camera%20Presets/Presets/presets.json");
+                const d = await r.json();
+                document.getElementById('presetGrid').innerHTML = d.map(p => 
+                    `<div class="wp-card">
+                        <img src="${p.img}" loading="lazy">
+                        <div class="wp-overlay">
+                            <p style="color:#fff;">${p.id || 'PRESET'}</p>
+                            <button class="btn" onclick="runDownload(this, '${p.url}')">
+                                <div class="progress-bar"></div><span class="btn-text">GET</span>
+                            </button>
+                        </div>
+                    </div>`
+                ).join('');
+            } catch(e) { document.getElementById('presetGrid').innerHTML = "ERROR"; }
+        }
+
+        // FORCE DOWNLOAD (NO PREVIEW)
+        async function runDownload(btn, url) {
+            const bar = btn.querySelector('.progress-bar'), txt = btn.querySelector('.btn-text');
+            btn.style.pointerEvents = 'none'; txt.innerText = '...';
+            bar.style.transition = 'width 1s linear'; bar.style.width = '100%';
+            
+            try {
+                const r = await fetch(url); const b = await r.blob(); const u = URL.createObjectURL(b);
+                const a = document.createElement('a'); a.href = u; a.download = "Preset_" + Date.now() + ".xml"; 
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(u);
+                txt.innerText = "SAVED";
+            } catch (e) { window.open(url, '_blank'); txt.innerText = "OPENED"; }
+            
+            setTimeout(() => { bar.style.transition = 'none'; bar.style.width = '0%'; txt.innerText = "GET"; btn.style.pointerEvents = 'all'; }, 1000);
+        }
+    </script>
+</body>
+</html>
