@@ -1,115 +1,222 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Software Updates - Nothing Space</title>
+    <title>System Update - Nothing Space</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <meta name="google-adsense-account" content="ca-pub-5140781527793808">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5140781527793808" crossorigin="anonymous"></script>
 
     <style>
-        /* PASTE YOUR FULL CSS HERE OR LINK IT */
-        /* Main wahi CSS use kar raha hu jo aapke paas already hai, bas thoda simplified */
-        :root { --bg: #000; --card: #0c0c0c; --text: #fff; --border: #1a1a1a; }
-        body { background: var(--bg); color: var(--text); font-family: 'VT323', monospace; padding: 20px; max-width: 600px; margin: 0 auto; }
-        
-        .header-nav { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; margin-top: 20px; }
-        .back-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 45px; height: 45px; border-radius: 50%; display: grid; place-items: center; text-decoration: none; font-size: 1.2rem; }
-        h1 { font-size: 2.5rem; line-height: 1; }
+        /* ================= EXACT CSS FROM YOUR INDEX.HTML ================= */
+        :root { 
+            --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #222; 
+            --border: #1a1a1a; --instr: #bbb; --accent: #ff0000;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color-scheme: light dark;
+        }
+        [data-theme="light"] { --bg: #fff; --card: #f5f5f5; --text: #000; --dot-bg: #ddd; --border: #eee; --instr: #333; }
+        [data-theme="dark"] { --bg: #000; --card: #0c0c0c; --text: #fff; --dot-bg: #250; --border: #1a1a1a; --instr: #bbb; }
 
-        /* Software Specific CSS */
-        .sw-display { display: flex; align-items: center; gap: 20px; margin: 20px 0; padding: 15px; background: var(--card); border-radius: 25px; border: 1px solid var(--border); display: none; }
-        .sw-img-box { width: 70px; height: 90px; border-radius: 12px; overflow: hidden; background: #222; }
-        .sw-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'VT323', monospace; 
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            overflow-x: hidden; transition: background var(--transition);
+        }
+
+        h1, h2, h3, span, button, select, input, p { font-family: 'VT323', monospace !important; text-transform: uppercase; }
+
+        /* IMAGE PROTECTION (NO PREVIEW/MENU) */
+        img { 
+            -webkit-touch-callout: none !important; 
+            -webkit-user-select: none !important; user-select: none !important; 
+            -webkit-user-drag: none !important; pointer-events: auto !important; 
+        }
+
+        /* BACKGROUNDS */
+        .stars-container { position: fixed; inset: 0; z-index: -1; background: var(--bg); overflow: hidden; pointer-events: none; }
+        .star { position: absolute; background: var(--text); border-radius: 50%; opacity: 0; will-change: opacity; }
+        .canvas { position: fixed; inset: 0; background-image: radial-gradient(var(--dot-bg) 1.2px, transparent 1.2px); background-size: 32px 32px; z-index: -1; opacity: 0.5; pointer-events: none; }
+
+        /* UI CONTAINER (Replicating the Modal Look) */
+        .page-wrapper {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            width: 90%; max-width: 500px;
+            border-radius: 35px; padding: 30px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            /* Entry Animation */
+            animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes bounceIn { 0% { transform: scale(0.7) translateY(50px); opacity:0; } 100% { transform: scale(1) translateY(0); opacity:1; } }
+
+        .close-icon { position: absolute; right: 25px; top: 25px; font-size: 2.2rem; cursor: pointer; opacity: 0.5; transition: 0.2s; color: var(--text); text-decoration: none; z-index: 10; }
+        .close-icon:hover { opacity: 1; }
+        h2 { margin-bottom: 20px; font-size: 2rem; line-height: 1; }
+
+        /* ELEMENTS */
+        .guide-box { border: 1px solid var(--border); border-radius: 22px; margin-bottom: 15px; overflow: hidden; margin-top: 20px; background: var(--card); }
+        .guide-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .guide-content { max-height: 0; overflow: hidden; transition: 0.4s ease; padding: 0 20px; opacity: 0; }
+        .guide-content.open { max-height: 500px; padding: 20px; opacity: 1; border-top: 1px solid var(--border); }
+        .guide-content p { color: var(--text); opacity: 0.8; font-size: 1.1rem; margin-bottom: 15px; text-transform:none; }
+
+        .sw-display { display: none; align-items: center; gap: 20px; margin: 15px 0; padding: 15px; background: var(--card); border-radius: 25px; border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
+        .sw-img-box { width: 70px; height: 90px; border-radius: 12px; overflow: hidden; background: var(--card); flex-shrink: 0; }
+        .sw-img-box img { width: 120%; height: 100%; object-fit: cover; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-group { position: relative; width: 100%; margin-bottom: 18px; display: flex; align-items: center; }
+        select { width: 100%; padding: 20px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 22px; font-size: 1.6rem; outline: none; appearance: none; }
         
-        select, .btn { width: 100%; padding: 18px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 22px; font-size: 1.4rem; font-family: 'VT323'; margin-bottom: 15px; outline: none; }
-        .btn { background: var(--text); color: var(--bg); font-weight: bold; cursor: pointer; position: relative; overflow: hidden; border: none; }
-        .progress-bar { position: absolute; top:0; left:0; height:100%; width:0%; background:rgba(128,128,128,0.5); }
+        /* DOT ARROW STYLE (Copied) */
+        .arrow-wrapper { position: absolute; right: 25px; pointer-events: none; color: var(--text); }
+        .dot-arrow { width: 20px; height: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+        .dot-row { display: flex; gap: 2px; }
+        .dot { width: 2.5px; height: 2.5px; background: var(--text); border-radius: 50%; }
+
+        .btn { position: relative; width: 100%; padding: 18px; border-radius: 22px; border: none; background: var(--text); color: var(--bg); font-size: 1.6rem; cursor: pointer; font-weight: bold; margin-top: 5px; overflow: hidden; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .progress-bar { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: rgba(128,128,128,0.5); z-index: 1; }
         .btn-text { position: relative; z-index: 2; }
         
-        .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: 25px; padding: 20px; display: none; margin-top: 15px; }
+        .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 25px; margin-top: 20px; animation: fadeIn 0.3s ease; }
+        ul { margin: 15px 0; opacity: 0.7; list-style: inside; text-transform: none; }
     </style>
 </head>
 <body>
+    <div class="stars-container" id="starField"></div>
+    <div class="canvas"></div>
 
-    <div class="header-nav">
-        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-        <h1>SYSTEM<br>UPDATE</h1>
+    <div class="page-wrapper">
+        <a href="index.html" class="close-icon">×</a>
+        <h2>SYSTEM UPDATE</h2>
+
+        <div class="guide-box">
+            <div class="guide-header" onclick="toggleAccordion()">
+                <span>HOW TO UPDATE?</span>
+                <div class="arrow-wrapper" style="position:static;"><div class="dot-arrow"><div class="dot-row"><div class="dot"></div><div class="dot" style="visibility:hidden"></div><div class="dot"></div></div><div class="dot-row"><div class="dot"></div><div class="dot"></div></div><div class="dot-row"><div class="dot"></div></div></div></div>
+            </div>
+            <div class="guide-content" id="accContent">
+                <p>1. DOWNLOAD THE BETA HUB TOOL APK.<br>2. CREATE "OTA" FOLDER IN INTERNAL STORAGE.<br>3. SETTING - SYSTEM - UPDATE.</p>
+                <button class="btn" onclick="runDownload(this, 'BETA_TOOL')"><div class="progress-bar"></div><span class="btn-text">DOWNLOAD BETA TOOL</span></button>
+            </div>
+        </div>
+
+        <div class="sw-display" id="swDisplay">
+            <div class="sw-img-box">
+                <img src="" id="swPhoneImg" style="cursor: pointer;" alt="Device"
+                     onmousedown="startSoftwareLogic()" ontouchstart="startSoftwareLogic()"
+                     onmouseup="cancelSoftwareLogic()" onmouseleave="cancelSoftwareLogic()"
+                     ontouchend="cancelSoftwareLogic()" ontouchmove="cancelSoftwareLogic()">
+            </div>
+            <div class="sw-info">
+                <h2 id="swPhoneTitle" style="font-size:2rem; margin-bottom:0;">DEVICE</h2>
+                <p style="opacity:0.5; font-size:0.9rem;">Official OTA Firmware</p>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <select id="swSelect" onchange="showLogs()">
+                <option value="">SELECT YOUR DEVICE</option>
+                <option value="p1">NOTHING PHONE (1)</option>
+                <option value="p2">NOTHING PHONE (2)</option>
+                <option value="p2a">NOTHING PHONE (2A)</option>
+                <option value="p2aplus">NOTHING PHONE (2A) PLUS</option>
+                <option value="p3">NOTHING PHONE (3)</option>
+                <option value="cmf1">CMF PHONE 1</option>
+            </select>
+            <div class="arrow-wrapper"><div class="dot-arrow"><div class="dot-row"><div class="dot"></div><div class="dot" style="visibility:hidden"></div><div class="dot"></div></div><div class="dot-row"><div class="dot"></div><div class="dot"></div></div><div class="dot-row"><div class="dot"></div></div></div></div>
+        </div>
+
+        <div id="logBox" style="display:none;" class="detail-card">
+            <h3 style="font-size:1.4rem;">NOTES:</h3>
+            <ul id="swList"></ul>
+            <button class="btn" onclick="runDownload(this, 'OTA_ZIP')"><div class="progress-bar"></div><span class="btn-text">DOWNLOAD OTA ZIP</span></button>
+        </div>
     </div>
 
-    <div class="sw-display" id="swDisplay">
-        <div class="sw-img-box"><img src="" id="swPhoneImg"></div>
-        <div><h2 id="swPhoneTitle" style="margin:0;">DEVICE</h2><p style="opacity:0.5;">Official OTA</p></div>
-    </div>
+    <script>
+        // CONFIG
+        let CONFIG = { SOFTWARE: {}, BETA_TOOL_URL: "https://github.com/nothingcommunity/Testing/raw/refs/heads/main/Apps/Beta%20Updates%20Hub.apk" };
+        
+        // INIT
+        window.onload = function() {
+            applyAutoTheme(); createStars(); initSoftwareData();
+        };
+        // BLOCK CONTEXT MENU (RIGHT CLICK / LONG PRESS PREVIEW)
+        window.addEventListener("contextmenu", function(e) { if (e.target.tagName === 'IMG') { e.preventDefault(); } }, false);
 
-    <select id="swSelect" onchange="showLogs()">
-        <option value="">SELECT YOUR DEVICE</option>
-        <option value="p1">NOTHING PHONE (1)</option>
-        <option value="p2">NOTHING PHONE (2)</option>
-        <option value="p2a">NOTHING PHONE (2A)</option>
-        <option value="p2aplus">NOTHING PHONE (2A) PLUS</option>
-        <option value="p3">NOTHING PHONE (3)</option>
-        <option value="cmf1">CMF PHONE 1</option>
-    </select>
+        // THEME & STARS
+        function applyAutoTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        }
+        function createStars() {
+            const f = document.getElementById('starField');
+            for(let i=0; i<100; i++) {
+                const s = document.createElement('div'); s.className = 'star'; const z = Math.random() * 3;
+                s.style.cssText = `width:${z}px; height:${z}px; top:${Math.random()*100}%; left:${Math.random()*100}%; animation: blink ${2+Math.random()*3}s infinite; opacity:${Math.random()}`;
+                f.appendChild(s);
+            }
+        }
 
-    <div id="logBox" class="detail-card">
-        <h3>CHANGELOG:</h3>
-        <ul id="swList" style="margin: 15px 20px; opacity: 0.7;"></ul>
-        <button class="btn" onclick="runDownload(this)">
-            <div class="progress-bar"></div><span class="btn-text">DOWNLOAD ZIP</span>
-        </button>
-    </div>
+        // DATA
+        async function initSoftwareData() {
+            try {
+                const r = await fetch("https://nothingsoftware-3cc7c-default-rtdb.firebaseio.com/software_data.json");
+                const d = await r.json(); if (d) CONFIG.SOFTWARE = d;
+            } catch (e) {}
+        }
 
-<script>
-    // Config Data (Copy ye har page pe jahan download chahiye)
-    let CONFIG = {};
-    
-    window.addEventListener('load', async () => {
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/nothingcommunity/Testing/main/Software/software.json");
-            const data = await res.json();
-            CONFIG = data.SOFTWARE;
-        } catch(e) { console.log(e); }
-    });
+        // UI LOGIC
+        function toggleAccordion() { document.getElementById('accContent').classList.toggle('open'); }
+        function showLogs() {
+            const m = document.getElementById('swSelect').value;
+            const b = document.getElementById('logBox'), d = document.getElementById('swDisplay');
+            if(!m || !CONFIG.SOFTWARE[m]) { b.style.display = 'none'; d.style.display = 'none'; return; }
+            const data = CONFIG.SOFTWARE[m];
+            document.getElementById('swPhoneImg').src = data.img;
+            document.getElementById('swPhoneTitle').innerText = data.disp;
+            d.style.display = 'flex';
+            document.getElementById('swList').innerHTML = (data.logs && Array.isArray(data.logs)) ? data.logs.map(l => `<li>${l}</li>`).join('') : "<li>Details not available</li>";
+            b.style.display = 'block';
+        }
 
-    function showLogs() {
-        const dev = document.getElementById('swSelect').value;
-        const box = document.getElementById('logBox');
-        const disp = document.getElementById('swDisplay');
-        
-        if(!dev || !CONFIG[dev]) { box.style.display='none'; disp.style.display='none'; return; }
-        
-        document.getElementById('swPhoneImg').src = CONFIG[dev].img;
-        document.getElementById('swPhoneTitle').innerText = CONFIG[dev].disp;
-        document.getElementById('swList').innerHTML = CONFIG[dev].logs.map(l => `<li>${l}</li>`).join('');
-        
-        disp.style.display = 'flex';
-        box.style.display = 'block';
-    }
+        // DOWNLOAD LOGIC (BLOB)
+        async function runDownload(btn, input) {
+            const bar = btn.querySelector('.progress-bar'), txt = btn.querySelector('.btn-text');
+            let url = input === 'BETA_TOOL' ? CONFIG.BETA_TOOL_URL : (input === 'OTA_ZIP' ? CONFIG.SOFTWARE[document.getElementById('swSelect').value]?.url : input);
+            if (!url) return alert("SELECT DEVICE!");
+            
+            btn.style.pointerEvents = 'none'; txt.innerText = 'PROCESSING...';
+            bar.style.transition = 'width 1.5s linear'; bar.style.width = '100%';
+            
+            setTimeout(() => {
+                const a = document.createElement('a'); a.href = url; a.target = "_blank";
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                txt.innerText = "DONE ✓";
+                setTimeout(() => { bar.style.transition = 'none'; bar.style.width = '0%'; txt.innerText = "DOWNLOAD"; btn.style.pointerEvents = 'all'; }, 1000);
+            }, 1000);
+        }
 
-    function runDownload(btn) {
-        const dev = document.getElementById('swSelect').value;
-        if(!dev) return;
-        const url = CONFIG[dev].url;
-        
-        const bar = btn.querySelector('.progress-bar');
-        const txt = btn.querySelector('.btn-text');
-        
-        btn.disabled = true;
-        txt.innerText = "OPENING...";
-        bar.style.width = "100%";
-        bar.style.transition = "width 1s";
-        
-        setTimeout(() => {
-            window.open(url, '_blank');
-            txt.innerText = "DONE";
-            btn.disabled = false;
-            setTimeout(() => { bar.style.width="0%"; txt.innerText="DOWNLOAD ZIP"; }, 2000);
-        }, 1000);
-    }
-</script>
+        // ADMIN LOGIC
+        function stringToHash(s){let h=0;if(s.length==0)return h;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return h.toString()}
+        let swT;
+        function startSoftwareLogic(){swT=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(50);openSoftwareMenu()},2500)}
+        function cancelSoftwareLogic(){clearTimeout(swT)}
+        async function openSoftwareMenu(){
+            const id=document.getElementById('swSelect').value; const p=prompt("PASS:");
+            if(stringToHash(p)==="1540218401"){
+                if(!id){if(confirm("ADD?")){alert("ADD MODE");}return;}
+                const cur=CONFIG.SOFTWARE[id]; const c=prompt(`EDIT ${cur.disp}: 1.URL 2.NAME 3.IMG`);
+                let l={}; if(c=="1")l={url:prompt("URL:")}; if(c=="2")l={disp:prompt("NAME:")}; if(c=="3")l={img:prompt("IMG:")};
+                if(Object.keys(l).length){await fetch(`https://nothingsoftware-3cc7c-default-rtdb.firebaseio.com/software_data/${id}.json`,{method:'PATCH',body:JSON.stringify(l)}); alert("SAVED"); initSoftwareData();}
+            }
+        }
+    </script>
 </body>
 </html>
